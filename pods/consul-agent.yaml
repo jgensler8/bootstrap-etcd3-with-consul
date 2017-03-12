@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: consul-agent
+spec:
+  hostNetwork: true
+  containers:
+    - name: "consul-agent"
+      image: "consul:0.7.5"
+      args:
+        - agent
+        - -ui
+        - -config-file=/etc/consul/config.json
+        - -join=CONSUL_SERVER
+      ports:
+      - name: http
+        port: 8500
+        containerPort: 8500
+        protocol: TCP
+      - name: rpc
+        port: 8300
+        containerPort: 8300
+        protocol: TCP
+      - name: serflan-tcp
+        port: 8301
+        containerPort: 8301
+        protocol: TCP
+      - name: serflan-udp
+        port: 8301
+        containerPort: 8301
+        protocol: UDP
+      - name: serfwan-tcp
+        port: 8302
+        containerPort: 8302
+        protocol: TCP
+      - name: serfwan-udp
+        port: 8302
+        containerPort: 8302
+        protocol: UDP
+      - name: consuldns-udp
+        port: 8600
+        containerPort: 8600
+        protocol: UDP
+      - name: consuldns-tcp
+        port: 8600
+        containerPort: 8600
+        protocol: TCP
+      volumeMounts:
+      - mountPath: /etc/consul/config.json
+        name: "etc-consul-config-json"
+  volumes:
+    - name: "etc-consul-config-json"
+      hostPath:
+        path: /etc/consul/config.json

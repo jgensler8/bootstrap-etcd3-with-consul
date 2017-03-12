@@ -1,0 +1,80 @@
+---
+version: "2"
+services:
+  consul:
+    hostname: consul-docker
+    image: consul
+    ports:
+    - 8600:8600/udp
+    - 8501:8500
+    command:
+    - agent
+    - -ui
+    - -node=consul
+    - -server
+    # - -bootstrap-expect=1
+    - -dev
+    - -bind=0.0.0.0
+    - -client=0.0.0.0
+    - -recursor=127.0.0.11
+    links:
+    - etcd3-0
+    - etcd3-1
+  socat:
+    hostname: socat
+    image: verb/socat
+    network_mode: host
+    command: udp-recvfrom:53,bind=192.168.65.2,fork udp-sendto:192.168.65.2:8600
+    cap_add:
+    - NET_BIND_SERVICE
+    user: root
+  consul-agent:
+    hostname: consul-docker
+    image: consul
+    ports:
+    - 8500:8500
+    command:
+    - agent
+    - -node=consul-agent
+    - -join=consul
+    - -bind=0.0.0.0
+    - -client=0.0.0.0
+    - -ui
+    links:
+    - etcd3-0
+    - etcd3-1
+    - consul
+  etcd3-0:
+    hostname: c0a84102.addr.dc1.consul
+    image: quay.io/coreos/etcd:v3.1.3
+    ports:
+    - 2379:2379
+    - 2380:2380
+    dns:
+    - 192.168.65.2
+    environment:
+    - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-1
+    - ETCD_INITIAL_CLUSTER_STATE=new
+    - ETCD_NAME=c0a84102.addr.dc1.consul.
+    - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+    - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+    - ETCD_ADVERTISE_CLIENT_URLS=http://192.168.65.2:2379
+    - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://192.168.65.2:2379
+    # - ETCD_INITIAL_CLUSTER=default=http://192.168.65.2:2380
+    - ETCD_DISCOVERY_SRV=mycluster.etcd3.service.dc1.consul.
+  etcd3-1:
+    hostname: etcd3-1
+    image: quay.io/coreos/etcd:v3.1.3
+    ports:
+    - 2479:2479
+    - 2480:2480
+    dns:
+    - 192.168.65.2
+    environment:
+    - ETCD_NAME=default
+    - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2480
+    - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2479
+    - ETCD_ADVERTISE_CLIENT_URLS=http://192.168.65.2:2479
+    # - ETCD_ADVERTISE_PEER_URLS=http://192.168.65.2:2479
+    # - ETCD_INITIAL_CLUSTER=http://192.168.112.2:2380
+    - ETCD_DISCOVERY_SRV=mycluster.etcd3.service.dc1.consul.

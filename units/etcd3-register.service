@@ -1,0 +1,18 @@
+[Service]
+EnvironmentFile=/etc/environment
+ExecStartPre=/usr/bin/curl http://${COREOS_PRIVATE_IPV4}:8500/v1/agent/self
+ExecStart=/usr/bin/curl \
+  curl -X POST --data "{ \
+  \"ID\":\"${COREOS_PRIVATE_IPV4}-TAG_TYPE\", \
+  \"Name\":\"ETCD3_CONSUL_SERVICE_NAME\", \
+  \"Service\":\"etcd-TAG_TYPE\", \
+  \"Tags\":[\"_etcd-TAG_TYPE._tcp.CLUSTER_NAME\"], \
+  \"Address\":\"${COREOS_PRIVATE_IPV4}\", \
+  \"Port\":TARGET_PORT}" \
+  http://${COREOS_PRIVATE_IPV4}:8500/v1/agent/service/register
+Restart=on-failure
+RestartSec=2
+[Install]
+WantedBy=multi-user.target
+[Unit]
+After=kubelet.service

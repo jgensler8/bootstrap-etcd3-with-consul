@@ -1,0 +1,47 @@
+#cloud-config
+coreos:
+  update:
+    reboot-strategy: "off"
+  units:
+    - name: "docker.service"
+      command: "start"
+    - name: "kubelet.service"
+      command: "start"
+    - name: "socat.service"
+      command: "start"
+write_files:
+  - path: "/etc/systemd/system/kubelet.service"
+    permissions: "0644"
+    owner: "root"
+    encoding: "gzip+base64"
+    content: "KUBELET_SERVICE_TEMPLATED"
+  - path: "/etc/systemd/system/socat.service"
+    permissions: "0644"
+    owner: "root"
+    encoding: "gzip+base64"
+    content: "SOCAT_SERVICE_TEMPLATED"
+  - path: "/etc/kubernetes/kubeconfig"
+    permissions: "0644"
+    owner: "root"
+    encoding: "gzip+base64"
+    content: "KUBECONFIG_TEMPLATED"
+  - path: "/etc/kubernetes/pods/consul-server.yaml"
+    permissions: "0644"
+    owner: "root"
+    encoding: "gzip+base64"
+    content: "CONSUL_SERVER_TEMPLATED"
+  - path: "/etc/consul/config.json"
+    permissions: "0644"
+    ownder: "root"
+    content: |
+      {
+        "datacenter": "CONSUL_DATACENTER",
+        "data_dir": "/opt/consul",
+        "log_level": "INFO",
+        "server": true,
+        "client_addr": "$private_ipv4",
+        "advertise_addr": "$private_ipv4",
+        "bind_addr": "$private_ipv4",
+        "node_name": "$private_ipv4",
+        "recursors": [ "8.8.8.8", "8.8.4.4" ]
+      }

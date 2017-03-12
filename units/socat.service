@@ -1,0 +1,16 @@
+[Service]
+EnvironmentFile=/etc/environment
+ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
+ExecStartPre=/bin/mkdir -p /srv/kubernetes/manifests
+ExecStartPre=/bin/mkdir -p /etc/kubernetes/checkpoint-secrets
+ExecStart=/usr/bin/docker run \
+  --user=root \
+  --cap-add=NET_BIND_SERVICE \
+  --net=host \
+  verb/socat udp-recvfrom:53,bind=${COREOS_PUBLIC_IPV4},fork udp-sendto:${COREOS_PUBLIC_IPV4}:8600
+Restart=always
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
+[Unit]
+After=docker.service

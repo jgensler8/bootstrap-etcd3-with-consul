@@ -1,0 +1,24 @@
+[Service]
+Environment=KUBELET_IMAGE=quay.io/coreos/hyperkube:v1.5.3_coreos.0
+ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
+ExecStartPre=/bin/mkdir -p /srv/kubernetes/manifests
+ExecStartPre=/bin/mkdir -p /etc/kubernetes/checkpoint-secrets
+ExecStart=/usr/lib/coreos/kubelet-wrapper \
+  --register-node \
+  --register-schedulable=false \
+  --lock-file=/var/run/lock/kubelet.lock \
+  --exit-on-lock-contention \
+  --pod-manifest-path=/etc/kubernetes/pods \
+  --allow-privileged \
+  --node-labels=master=true \
+  --minimum-container-ttl-duration=6m0s \
+  --cluster_dns=CLUSTER_DNS \
+  --cluster_domain=CLUSTER_DOMAIN
+  # --require-kubeconfig \
+  # --kubeconfig=/etc/kubernetes/kubeconfig \
+Restart=always
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
+[Unit]
+After=docker.service
