@@ -1,4 +1,6 @@
-# pod2consul
+# bootstrap-etcd3-with-consul
+
+Don't forget to read the blog article [located here](https://medium.com/@jeffzzq/bootstrapping-etcd3-with-consul-ded64d1bda93#.oxi2pfwdn)!
 
 ## Vagrant Simulation
 
